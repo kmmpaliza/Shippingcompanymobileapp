@@ -41,7 +41,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             </div>
           </div>
           <h1 className="text-white text-4xl font-bold mb-2 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-            ShipFast AI
+            BeltSense AI
           </h1>
           <p className="text-purple-200 flex items-center justify-center gap-2">
             <Sparkles className="w-4 h-4" />
@@ -119,7 +119,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         </div>
 
         <p className="text-center text-purple-300/60 text-sm mt-6">
-          © 2026 ShipFast AI. Powered by Advanced Intelligence.
+          © 2026 BeltSense AI. Powered by Advanced Intelligence.
         </p>
       </div>
     </div>
