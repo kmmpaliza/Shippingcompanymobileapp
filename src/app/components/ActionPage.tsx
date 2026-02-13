@@ -139,7 +139,7 @@ export function ActionPage({ actionType, onBack }: ActionPageProps) {
                 <Button
                   onClick={onBack}
                   variant="outline"
-                  className="w-full border-white/20 text-white hover:bg-white/10 backdrop-blur-sm"
+                  className="w-full border-white/20 hover:bg-white/10 backdrop-blur-sm"
                 >
                   Cancel
                 </Button>
