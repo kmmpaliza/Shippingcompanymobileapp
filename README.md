@@ -9,3 +9,12 @@
 
   Run `npm run dev` to start the development server.
   
+  ## Additional installation for Ollama (AI integration) and running it locally
+
+  Run `brew install ollama`
+
+  Run `ollama serve` to start Ollama, make sure to run this before starting a AI assistant
+
+  Run `ollama create logistics-twin -f Modelfile` to gather model components
+
+  Run `ollama run logistics-twin` to test it locally

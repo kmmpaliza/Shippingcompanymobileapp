@@ -25,9 +25,10 @@ interface DashboardProps {
   onLogout: () => void;
   onActionClick: (actionType: string) => void;
   onCreateAction: () => void;
+  onChatBotClick: () => void;
 }
 
-export function Dashboard({ onLogout, onActionClick, onCreateAction }: DashboardProps) {
+export function Dashboard({ onLogout, onActionClick, onCreateAction, onChatBotClick }: DashboardProps) {
   const [activeInsight, setActiveInsight] = useState(0);
 
   const stats = [
@@ -279,7 +280,9 @@ export function Dashboard({ onLogout, onActionClick, onCreateAction }: Dashboard
         </div>
 
         {/* AI Assistant FAB */}
-        <button className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-2xl shadow-purple-500/50 hover:scale-110 transition-transform ring-4 ring-purple-400/30">
+        <button
+            onClick={onChatBotClick} 
+            className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-2xl shadow-purple-500/50 hover:scale-110 transition-transform ring-4 ring-purple-400/30">
           <MessageSquare className="w-6 h-6 text-white" />
         </button>
       </div>
