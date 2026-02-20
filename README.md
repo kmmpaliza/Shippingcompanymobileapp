@@ -15,6 +15,8 @@
 
   Run `ollama serve` to start Ollama, make sure to run this before starting a AI assistant
 
-  Run `ollama create logistics-twin -f Modelfile` to gather model components
+  Run `ollama create logistics-twin -f Modelfile` to gather model components for chatbot
+
+  Run `ollama create predictive-logistics-twin -f PredicitiveModelfile` to gather model components for AI Insights
 
   Run `ollama run logistics-twin` to test it locally

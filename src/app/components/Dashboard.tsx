@@ -1,25 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Package,
-  Truck,
-  MapPin,
-  BarChart3,
-  FileText,
-  Clock,
-  CheckCircle,
-  AlertCircle,
   User,
   LogOut,
   Sparkles,
-  TrendingUp,
-  Zap,
   Brain,
   MessageSquare,
   Plus,
+  CircleAlert,
+  TriangleAlert,
 } from "lucide-react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
+import { getAlertRecommendation } from '../services/ollama';
+import alertRingtone from "../media/alert_message.mp3";
 
 interface DashboardProps {
   onLogout: () => void;
@@ -29,104 +24,89 @@ interface DashboardProps {
 }
 
 export function Dashboard({ onLogout, onActionClick, onCreateAction, onChatBotClick }: DashboardProps) {
-  const [activeInsight, setActiveInsight] = useState(0);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [activeAlert, setActiveAlert] = useState(0);
 
-  const stats = [
-    {
-      label: "Active Shipments",
-      value: "24",
-      icon: Truck,
-      color: "text-cyan-400",
-      bg: "from-cyan-500/20 to-blue-500/20",
-      trend: "+12%",
-    },
-    {
-      label: "Delivered Today",
-      value: "18",
-      icon: CheckCircle,
-      color: "text-emerald-400",
-      bg: "from-emerald-500/20 to-green-500/20",
-      trend: "+8%",
-    },
-    {
-      label: "Pending",
-      value: "6",
-      icon: Clock,
-      color: "text-amber-400",
-      bg: "from-amber-500/20 to-orange-500/20",
-      trend: "-4%",
-    },
-    {
-      label: "Issues",
-      value: "2",
-      icon: AlertCircle,
-      color: "text-rose-400",
-      bg: "from-rose-500/20 to-red-500/20",
-      trend: "-50%",
-    },
+  const mockChuteData = [
+    { chute: "A12", fillLevel: 60 },
+    { chute: "B07", fillLevel: 100 },
+    // { chute: "C03", fillLevel: 100 },
   ];
 
   const actions = [
     {
-      label: "Chute Full",
+      label: "Chute Cleared",
       icon: Package,
       gradient: "from-blue-500 to-cyan-500",
-      description: "Alert Web App that the chute is full",
+      description: "",
     },
-    // {
-    //   label: "Chute",
-    //   icon: MapPin,
-    //   gradient: "from-emerald-500 to-green-500",
-    //   description: "Real-time tracking",
-    // },
-    // {
-    //   label: "AI Insights",
-    //   icon: Brain,
-    //   gradient: "from-purple-500 to-pink-500",
-    //   description: "Smart analytics",
-    // },
-    // {
-    //   label: "Documents",
-    //   icon: FileText,
-    //   gradient: "from-orange-500 to-amber-500",
-    //   description: "Auto-generate",
-    // },
-    // {
-    //   label: "Fleet Status",
-    //   icon: Truck,
-    //   gradient: "from-teal-500 to-cyan-500",
-    //   description: "Live monitoring",
-    // },
-    // {
-    //   label: "Optimize Routes",
-    //   icon: Zap,
-    //   gradient: "from-violet-500 to-purple-500",
-    //   description: "AI optimization",
-    // },
+    {
+      label: "Pallet Changed",
+      icon: Package,
+      gradient: "from-blue-500 to-cyan-500",
+      description: "",
+    },
   ];
 
-  const aiInsights = [
+  const aiInsightsIcons = [
     {
-      icon: TrendingUp,
-      title: "Peak Efficiency Detected",
-      message:
-        "Your fleet is performing 23% above average today",
-      color: "text-emerald-400",
+      icon: CircleAlert,
+      color: "text-red-400",
+      severity: "CRITICAL",
     },
     {
-      icon: Sparkles,
-      title: "Route Optimization Available",
-      message:
-        "AI suggests 3 routes that could save 45 minutes",
-      color: "text-blue-400",
+      icon: TriangleAlert,
+      color: "text-orange-400",
+      severity: "MEDIUM",
     },
     {
-      icon: AlertCircle,
-      title: "Weather Alert",
-      message: "Potential delays on Route 7 due to conditions",
-      color: "text-amber-400",
+      icon: TriangleAlert,
+      color: "text-orange-400",
+      severity: "HIGH",
     },
   ];
+
+
+  // Handle incoming data
+  const handleIncomingData = (data: { chute: string; fillLevel: number }) => {
+    if (data.fillLevel >= 75) {
+      getAlertRecommendation(data.chute, data.fillLevel).then(recommendation => {
+        setAlerts(prev => {
+          // Avoid duplicates for the same chute
+          const filtered = prev.filter(a => a.chute !== recommendation.chute);
+          const updatedAlerts = [...filtered, recommendation];
+
+          // Trigger sound/vibration if it's a CRITICAL alert
+          if (recommendation.Severity === "CRITICAL" || recommendation.Severity === "HIGH") {
+            triggerMobileAlert();
+          }
+
+          return updatedAlerts;
+        });
+      });
+    }
+  };
+
+  const triggerMobileAlert = () => {
+    // Vibrate
+    if (navigator.vibrate) navigator.vibrate([300, 100, 300]);
+
+    // Play sound
+    const sound = new Audio(alertRingtone);
+    sound.play().catch(() => console.log("Cannot play sound"));
+  };
+
+  useEffect(() => {
+
+    // const interval = setInterval(() => {
+    // Here you would fetch real backend data, we use mock data
+    mockChuteData.forEach(data => handleIncomingData(data));
+
+    // }, 5000);
+
+    // return () => clearInterval(interval);
+  }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -183,41 +163,44 @@ export function Dashboard({ onLogout, onActionClick, onCreateAction, onChatBotCl
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-white flex items-center gap-2">
               <Brain className="w-4 h-4 text-purple-400" />
-              AI Insights
+              Alerts
             </h3>
             <div className="flex gap-1">
-              {aiInsights.map((_, index) => (
+              {alerts.map((_, index) => (
                 <button
                   key={index}
-                  onClick={() => setActiveInsight(index)}
-                  className={`w-1.5 h-1.5 rounded-full transition-all ${
-                    activeInsight === index
-                      ? "bg-purple-400 w-4"
-                      : "bg-white/30"
-                  }`}
+                  onClick={() => setActiveAlert(index)}
+                  className={`w-1.5 h-1.5 rounded-full transition-all ${activeAlert === index
+                    ? "bg-purple-400 w-4"
+                    : "bg-white/30"
+                    }`}
                 />
               ))}
             </div>
           </div>
           <div className="backdrop-blur-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl p-4 border border-purple-400/30 shadow-xl">
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-xl bg-white/10">
-                {React.createElement(
-                  aiInsights[activeInsight].icon,
-                  {
-                    className: `w-5 h-5 ${aiInsights[activeInsight].color}`,
-                  },
-                )}
+            {alerts.length > 0 && alerts[activeAlert] ? (
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-xl bg-white/10">
+                  {/* {React.createElement(
+                    alerts[activeAlert].Severity ==,
+                    {
+                      className: `w-5 h-5 ${aiInsights[activeInsight].color}`,
+                    },
+                  )} */}
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-white text-sm mb-1">
+                    {alerts[activeAlert].Summary}
+                  </h4>
+                  <p className="text-xs text-purple-100">
+                    {alerts[activeAlert].Recommendations}
+                  </p>
+                </div>
               </div>
-              <div className="flex-1">
-                <h4 className="font-semibold text-white text-sm mb-1">
-                  {aiInsights[activeInsight].title}
-                </h4>
-                <p className="text-xs text-purple-100">
-                  {aiInsights[activeInsight].message}
-                </p>
-              </div>
-            </div>
+            ) : (
+              <p className="text-white/70 text-sm">No alerts yet</p>
+            )}
           </div>
         </div>
 
@@ -281,8 +264,8 @@ export function Dashboard({ onLogout, onActionClick, onCreateAction, onChatBotCl
 
         {/* AI Assistant FAB */}
         <button
-            onClick={onChatBotClick} 
-            className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-2xl shadow-purple-500/50 hover:scale-110 transition-transform ring-4 ring-purple-400/30">
+          onClick={onChatBotClick}
+          className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-2xl shadow-purple-500/50 hover:scale-110 transition-transform ring-4 ring-purple-400/30">
           <MessageSquare className="w-6 h-6 text-white" />
         </button>
       </div>

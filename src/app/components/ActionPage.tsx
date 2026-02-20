@@ -17,6 +17,8 @@ import { Badge } from './ui/badge';
 import { Textarea } from './ui/textarea';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { Chutes } from '../types/chutes';
 
 interface ActionPageProps {
   actionType: string;
@@ -29,16 +31,25 @@ export function ActionPage({ actionType, onBack }: ActionPageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
+  // const [chutes, setChutes] = useState<Chutes[]>([]); 
+  const [chutes, setChutes] = useState<Chutes[]>([
+    { id: 1, name: 'Chute 1', status: 'Normal', fillLevel: 45, lastUpdated: '10:23:15 AM', hasActiveAlert: false },
+    { id: 2, name: 'Chute 2', status: 'Warning', fillLevel: 75, lastUpdated: '10:20:42 AM', hasActiveAlert: false },
+    { id: 3, name: 'Chute 3', status: 'Full', fillLevel: 100, lastUpdated: '10:15:30 AM', hasActiveAlert: true },
+    { id: 4, name: 'Chute 4', status: 'Normal', fillLevel: 30, lastUpdated: '10:25:01 AM', hasActiveAlert: false },
+    { id: 5, name: 'Chute 5', status: 'Offline', fillLevel: 0, lastUpdated: '09:45:12 AM', hasActiveAlert: false },
+  ]);
+  const [selected, setSelected] = useState<string>("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     // Simulate API call
     setTimeout(() => {
       setIsSubmitting(false);
       setIsSuccess(true);
-      
+
       // Reset after 2 seconds and go back
       setTimeout(() => {
         setIsSuccess(false);
@@ -109,7 +120,7 @@ export function ActionPage({ actionType, onBack }: ActionPageProps) {
               <div className={`w-24 h-24 bg-gradient-to-br ${actionDetails.gradient} rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-${actionDetails.gradient}/50 ring-4 ring-white/10`}>
                 <ActionIcon className="w-12 h-12 text-white" />
               </div>
-              
+
               <h2 className="text-2xl font-bold text-white mb-2">{actionDetails.title}</h2>
               <p className="text-purple-200 mb-6">{actionDetails.description}</p>
 
@@ -135,7 +146,7 @@ export function ActionPage({ actionType, onBack }: ActionPageProps) {
                   <CheckCircle className="w-4 h-4 mr-2" />
                   Confirm & Continue
                 </Button>
-                
+
                 <Button
                   onClick={onBack}
                   variant="outline"
@@ -234,53 +245,54 @@ export function ActionPage({ actionType, onBack }: ActionPageProps) {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Quick Actions */}
-          <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-4 border border-white/10 shadow-xl">
-            <h4 className="text-sm font-semibold text-white mb-3">Quick Capture</h4>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                className="backdrop-blur-xl bg-white/5 rounded-xl p-3 border border-white/10 hover:border-white/30 transition-all active:scale-95 text-center"
-              >
-                <Camera className="w-5 h-5 text-cyan-400 mx-auto mb-1" />
-                <span className="text-xs text-white/80">Photo</span>
-              </button>
-              <button
-                type="button"
-                className="backdrop-blur-xl bg-white/5 rounded-xl p-3 border border-white/10 hover:border-white/30 transition-all active:scale-95 text-center"
-              >
-                <MapPin className="w-5 h-5 text-emerald-400 mx-auto mb-1" />
-                <span className="text-xs text-white/80">Location</span>
-              </button>
-              <button
-                type="button"
-                className="backdrop-blur-xl bg-white/5 rounded-xl p-3 border border-white/10 hover:border-white/30 transition-all active:scale-95 text-center"
-              >
-                <Upload className="w-5 h-5 text-purple-400 mx-auto mb-1" />
-                <span className="text-xs text-white/80">Scan QR</span>
-              </button>
-            </div>
-          </div>
 
           {/* Form Fields */}
           <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-4 border border-white/10 shadow-xl space-y-4">
             <div className="space-y-2">
               <Label htmlFor="location" className="text-white/90">
-                Location / Chute ID
+                Chute ID
               </Label>
-              <Input
+              {/* <Input
                 id="location"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="e.g., Warehouse A - Chute 5"
                 className="bg-white/5 border-white/20 text-white placeholder:text-white/40 backdrop-blur-sm focus:bg-white/10 focus:border-cyan-400/50"
                 required
-              />
+              /> */}
+              <div className="space-y-2">
+                <DropdownMenu.Root>
+                  <DropdownMenu.Trigger
+                    id="dropdown"
+                    className="w-full p-3 bg-white/5 border border-white/20 text-white placeholder:text-white/40 rounded-lg backdrop-blur-sm text-left focus:bg-white/10 focus:border-cyan-400/50"
+                  >
+                    {selected || "Tap to select reason"}
+                  </DropdownMenu.Trigger>
+
+                  <DropdownMenu.Portal>
+                    <DropdownMenu.Content
+                      className="mt-2 w-full max-w-sm bg-white/5 border border-white/20 backdrop-blur-sm rounded-lg shadow-lg z-[1000]" 
+                      align="start"
+                      sideOffset={5}
+                    >
+                      {chutes.map((option) => (
+                        <DropdownMenu.Item
+                          key={option.id}
+                          onSelect={() => setSelected(option.name)}
+                          className="p-3 text-white cursor-pointer hover:bg-white/10 rounded"
+                        >
+                          {option.name}
+                        </DropdownMenu.Item>
+                      ))}
+                    </DropdownMenu.Content>
+                  </DropdownMenu.Portal>
+                </DropdownMenu.Root>
+              </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="notes" className="text-white/90">
-                Additional Notes
+                Action taken / Additional Notes
               </Label>
               <Textarea
                 id="notes"
@@ -290,28 +302,6 @@ export function ActionPage({ actionType, onBack }: ActionPageProps) {
                 rows={4}
                 className="bg-white/5 border-white/20 text-white placeholder:text-white/40 backdrop-blur-sm focus:bg-white/10 focus:border-cyan-400/50 resize-none"
               />
-            </div>
-
-            {/* Priority Level */}
-            <div className="space-y-2">
-              <Label className="text-white/90">Priority Level</Label>
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { label: 'Low', color: 'emerald' },
-                  { label: 'Medium', color: 'amber' },
-                  { label: 'High', color: 'rose' },
-                ].map((priority) => (
-                  <button
-                    key={priority.label}
-                    type="button"
-                    className={`backdrop-blur-xl bg-white/5 rounded-lg p-2 border border-white/10 hover:border-${priority.color}-400/50 transition-all active:scale-95 text-center`}
-                  >
-                    <span className={`text-xs font-semibold text-${priority.color}-300`}>
-                      {priority.label}
-                    </span>
-                  </button>
-                ))}
-              </div>
             </div>
           </div>
 
